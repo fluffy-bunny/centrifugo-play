@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -30,6 +31,7 @@ func connToken(user string, exp int64) string {
 	if err != nil {
 		panic(err)
 	}
+	fmt.Println("token: ", t)
 	return t
 }
 
