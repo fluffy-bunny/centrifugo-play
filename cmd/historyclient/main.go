@@ -1,18 +1,15 @@
 package main
 
 import (
-	"bufio"
 	"context"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
-	"os"
-	"strings"
 
 	_ "net/http/pprof"
 
-	"github.com/centrifugal/centrifuge-go"
+	centrifuge "github.com/centrifugal/centrifuge-go"
 	"github.com/golang-jwt/jwt"
 )
 
@@ -41,6 +38,7 @@ type ChatMessage struct {
 }
 
 func main() {
+	//	var streamPosition *centrifuge.StreamPosition
 	go func() {
 		log.Println(http.ListenAndServe(":6060", nil))
 	}()
@@ -73,7 +71,12 @@ func main() {
 	})
 
 	client.OnSubscribed(func(e centrifuge.ServerSubscribedEvent) {
-		log.Printf("Subscribed to server-side channel %s: (was recovering: %v, recovered: %v)", e.Channel, e.WasRecovering, e.Recovered)
+
+		streamPositionEpoch := e.StreamPosition.Epoch
+		streamPositionOffset := e.StreamPosition.Offset
+		log.Printf("Subscribed to server-side channel %s: (was recovering: %v, recovered: %v) - streamPostion(Epoch:%s,offset:%d )",
+			e.Channel, e.WasRecovering, e.Recovered,
+			streamPositionEpoch, streamPositionOffset)
 	})
 	client.OnSubscribing(func(e centrifuge.ServerSubscribingEvent) {
 		log.Printf("Subscribing to server-side channel %s", e.Channel)
@@ -97,11 +100,12 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	sub, err := client.NewSubscription("chat:index", centrifuge.SubscriptionConfig{
-		Recoverable: true,
-		JoinLeave:   true,
-		Positioned:  true,
-	})
+	sub, err := client.NewSubscription("chat:index",
+		centrifuge.SubscriptionConfig{
+			Recoverable: true,
+			JoinLeave:   true,
+			Positioned:  true,
+		})
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -109,8 +113,18 @@ func main() {
 	sub.OnSubscribing(func(e centrifuge.SubscribingEvent) {
 		log.Printf("Subscribing on channel %s - %d (%s)", sub.Channel, e.Code, e.Reason)
 	})
+	var streamPosition *centrifuge.StreamPosition
+
 	sub.OnSubscribed(func(e centrifuge.SubscribedEvent) {
-		log.Printf("Subscribed on channel %s, (was recovering: %v, recovered: %v)", sub.Channel, e.WasRecovering, e.Recovered)
+		streamPosition = e.StreamPosition
+		streamPositionEpoch := streamPosition.Epoch
+		streamPositionOffset := streamPosition.Offset
+
+		log.Printf("Subscribed on channel %s, (was recovering: %v, recovered: %v) - streamPostion(Epoch:%s,offset:%d )",
+			sub.Channel, e.WasRecovering, e.Recovered,
+			streamPositionEpoch, streamPositionOffset)
+
+		streamPosition.Offset = 0
 	})
 	sub.OnUnsubscribed(func(e centrifuge.UnsubscribedEvent) {
 		log.Printf("Unsubscribed from channel %s - %d (%s)", sub.Channel, e.Code, e.Reason)
@@ -139,6 +153,7 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
+	restoreMissedPublications(sub, streamPosition)
 
 	pubText := func(text string) error {
 		msg := &ChatMessage{
@@ -156,44 +171,21 @@ func main() {
 
 	log.Printf("Print something and press ENTER to send\n")
 
-	// Read input from stdin.
-	go func(sub *centrifuge.Subscription) {
-		reader := bufio.NewReader(os.Stdin)
-		for {
-			text, _ := reader.ReadString('\n')
-			text = strings.TrimSpace(text)
-			switch text {
-			case "#subscribe":
-				err := sub.Subscribe()
-				if err != nil {
-					log.Println(err)
-				}
-			case "#unsubscribe":
-				err := sub.Unsubscribe()
-				if err != nil {
-					log.Println(err)
-				}
-			case "#disconnect":
-				err := client.Disconnect()
-				if err != nil {
-					log.Println(err)
-				}
-			case "#connect":
-				err := client.Connect()
-				if err != nil {
-					log.Println(err)
-				}
-			case "#close":
-				client.Close()
-			default:
-				err = pubText(text)
-				if err != nil {
-					log.Printf("Error publish: %s", err)
-				}
-			}
-		}
-	}(sub)
-
 	// Run until CTRL+C.
 	select {}
+}
+
+func handlePublication(sub *centrifuge.Subscription, pub centrifuge.Publication) {}
+func restoreMissedPublications(sub *centrifuge.Subscription, streamPosition *centrifuge.StreamPosition) {
+	historyResult, err := sub.History(context.Background(),
+		centrifuge.WithHistorySince(streamPosition),
+		centrifuge.WithHistoryLimit(100),
+	)
+	if err != nil {
+		log.Printf("error getting history: %v", err)
+		return
+	}
+	for _, pub := range historyResult.Publications {
+		pub.Data = []byte(fmt.Sprintf("Restored: %s", string(pub.Data)))
+	}
 }
