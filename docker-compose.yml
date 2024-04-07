@@ -7,8 +7,19 @@ services:
       - ./config.json:/centrifugo/config.json
     command: centrifugo -c config.json
     ports:
-      - 8000:8000
+      - 8079:8000
     ulimits:
       nofile:
         soft: 65535
         hard: 65535
+#  redis:
+#    image: redis:7.2.4-alpine
+#    container_name: redis
+#    hostname: redis
+#    networks:
+#      - private
+#    ports:
+#      - 6379:6379
+#    volumes:
+#      - ./configs/redis/redis.conf:/etc/redis/redis.conf:ro
+#    command: redis-server /etc/redis/redis.conf

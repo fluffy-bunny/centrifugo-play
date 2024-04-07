@@ -16,6 +16,10 @@ import (
 // In real life clients should never know secret key. This is only for example
 // purposes to quickly generate JWT for connection.
 const exampleTokenHmacSecret = "my_secret"
+const port = 8079
+
+// "ws://localhost:8000/connection/websocket",
+var endpoint = fmt.Sprintf("ws://localhost:%d/connection/websocket", port)
 
 func connToken(user string, exp int64) string {
 	// NOTE that JWT must be generated on backend side of your application!
@@ -44,7 +48,7 @@ func main() {
 	}()
 
 	client := centrifuge.NewJsonClient(
-		"ws://localhost:8000/connection/websocket",
+		endpoint,
 		centrifuge.Config{
 			// Sending token makes it work with Centrifugo JWT auth (with `secret` HMAC key).
 			Token: connToken("49", 0),

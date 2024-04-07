@@ -11,6 +11,13 @@
             "mode": "auto",
             "program": "${workspaceFolder}/cmd/chat",
              
+        }, {
+            "name": "historyclient",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/cmd/historyclient",
+             
         }, 
     ]
 }

@@ -26,9 +26,9 @@ func Init(rootCmd *cobra.Command) {
 		Use:   "publish",
 		Short: "publish to a channel",
 		Run: func(cmd *cobra.Command, args []string) {
-
+			endpoint := fmt.Sprintf("ws://localhost:%d/connection/websocket", internal.Port)
 			client := centrifuge.NewJsonClient(
-				"ws://localhost:8000/connection/websocket",
+				endpoint,
 				centrifuge.Config{
 					// Sending token makes it work with Centrifugo JWT auth (with `secret` HMAC key).
 					Token: connToken("49", 0),
