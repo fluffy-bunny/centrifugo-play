@@ -1,0 +1,22 @@
+{
+  "token_jwks_public_endpoint": "http://mock-oauth2-pro:50053/.well-known/jwks",
+  "admin_password": "password",
+  "admin_secret": "secret",
+  "admin": true,
+  "allowed_origins": ["http://localhost:3000"],
+  "allow_subscribe_for_client": true,
+  "namespaces": [
+    {
+      "name": "connector",
+      "presence": true,
+      "join_leave": true,
+      "history_size": 200,
+      "history_ttl": "300h",
+      "force_positioning": true,
+      "force_recovery": true,
+      "allow_history_for_subscriber": true,
+      "allow_publish_for_client": true,
+      "allow_subscribe_for_client": true
+    }
+  ]
+}
