@@ -8,6 +8,7 @@ import (
 
 	"centrifugo-play/cmd/cli/internal"
 	"centrifugo-play/cmd/cli/root/publish"
+	"centrifugo-play/cmd/cli/root/subscribe"
 	"centrifugo-play/cmd/cli/root/version"
 
 	"github.com/spf13/cobra"
@@ -88,5 +89,6 @@ func InitRootCmd() *cobra.Command {
 
 	version.Init(rootCmd)
 	publish.Init(rootCmd)
+	subscribe.Init(rootCmd)
 	return rootCmd
 }

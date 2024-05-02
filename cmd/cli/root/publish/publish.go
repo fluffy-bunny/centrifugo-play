@@ -7,15 +7,13 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/centrifugal/centrifuge-go"
+	centrifuge "github.com/centrifugal/centrifuge-go"
 	zerolog "github.com/rs/zerolog"
 	log "github.com/rs/zerolog/log"
-	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
-	cc "golang.org/x/oauth2/clientcredentials"
+	cobra "github.com/spf13/cobra"
+	viper "github.com/spf13/viper"
 )
 
-// Version global
 var Message string
 
 func init() {
@@ -30,13 +28,7 @@ func Init(rootCmd *cobra.Command) {
 			ctx := context.Background()
 			log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr}).With().Caller().Timestamp().Logger()
 
-			config := &cc.Config{
-				ClientID:     internal.OAuth2.ClientID,
-				ClientSecret: internal.OAuth2.ClientSecret,
-				TokenURL:     internal.OAuth2.TokenEndepoint,
-				Scopes:       []string{},
-			}
-			tokenSource := config.TokenSource(ctx)
+			tokenSource := internal.GetTokenSource(ctx)
 			token, err := tokenSource.Token()
 			if err != nil {
 				log.Fatal().Err(err).Msg("failed to get token")
@@ -58,40 +50,39 @@ func Init(rootCmd *cobra.Command) {
 			defer client.Close()
 
 			client.OnConnecting(func(e centrifuge.ConnectingEvent) {
-				log.Printf("Connecting - %d (%s)", e.Code, e.Reason)
+				log.Info().Interface("event", e).Msg("OnConnecting")
 			})
 			client.OnConnected(func(e centrifuge.ConnectedEvent) {
-				log.Printf("Connected with ID %s", e.ClientID)
+				log.Info().Interface("event", e).Msg("OnConnected")
 			})
 			client.OnDisconnected(func(e centrifuge.DisconnectedEvent) {
-				log.Printf("Disconnected: %d (%s)", e.Code, e.Reason)
+				log.Info().Interface("event", e).Msg("OnDisconnected")
 			})
-
 			client.OnError(func(e centrifuge.ErrorEvent) {
-				log.Printf("Error: %s", e.Error.Error())
+				log.Error().Interface("event", e).Msg("OnError")
 			})
 
 			client.OnMessage(func(e centrifuge.MessageEvent) {
-				log.Printf("Message from server: %s", string(e.Data))
+				log.Info().Interface("event", e).Msg("OnMessage")
 			})
 			client.OnSubscribed(func(e centrifuge.ServerSubscribedEvent) {
-				log.Printf("Subscribed to server-side channel %s: (was recovering: %v, recovered: %v)", e.Channel, e.WasRecovering, e.Recovered)
+				log.Info().Interface("event", e).Msg("OnSubscribed")
 			})
 			client.OnSubscribing(func(e centrifuge.ServerSubscribingEvent) {
-				log.Printf("Subscribing to server-side channel %s", e.Channel)
+				log.Info().Interface("event", e).Msg("OnSubscribing")
 			})
 			client.OnUnsubscribed(func(e centrifuge.ServerUnsubscribedEvent) {
-				log.Printf("Unsubscribed from server-side channel %s", e.Channel)
+				log.Info().Interface("event", e).Msg("OnUnsubscribed")
 			})
 
 			client.OnPublication(func(e centrifuge.ServerPublicationEvent) {
-				log.Printf("Publication from server-side channel %s: %s (offset %d)", e.Channel, e.Data, e.Offset)
+				log.Info().Interface("event", e).Msg("OnPublication")
 			})
 			client.OnJoin(func(e centrifuge.ServerJoinEvent) {
-				log.Printf("Join to server-side channel %s: %s (%s)", e.Channel, e.User, e.Client)
+				log.Info().Interface("event", e).Msg("OnJoin")
 			})
 			client.OnLeave(func(e centrifuge.ServerLeaveEvent) {
-				log.Printf("Leave from server-side channel %s: %s (%s)", e.Channel, e.User, e.Client)
+				log.Info().Interface("event", e).Msg("OnLeave")
 			})
 
 			err = client.Connect()
@@ -113,7 +104,7 @@ func Init(rootCmd *cobra.Command) {
 	var flagName = "message"
 	message := `{"a":"b"}`
 	command.PersistentFlags().StringVar(&Message, flagName, message, fmt.Sprintf("[required] i.e. --%s='%s'", flagName, message))
-	viper.BindPFlag(flagName, rootCmd.PersistentFlags().Lookup(flagName))
+	viper.BindPFlag(flagName, command.PersistentFlags().Lookup(flagName))
 
 	rootCmd.AddCommand(command)
 }
