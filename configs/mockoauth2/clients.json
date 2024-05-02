@@ -34,5 +34,15 @@
     "client_secret": "secret",
     "expiration": 3600,
     "issuer": ""
+  },
+  {
+    "claims": {
+      "channel": "connector:foobar",
+      "sub": "connector-foobar-one"
+    },
+    "client_id": "connector-foobar-one",
+    "client_secret": "secret",
+    "expiration": 3600,
+    "issuer": ""
   }
 ]

@@ -35,7 +35,7 @@ The following will publish and subscribe to the channel ```connector:foobar``` u
 .\centrifugo-cli.exe publish --message='{"a":"b"}'
 ```
 
-```console
+```powershell
 7:23AM INF cmd\cli\root\publish\publish.go:37 > got token token={"access_token":"eyJhbGciOiJFUzI1NiIsImtpZCI6IjBiMmNkMmU1NGM5MjRjZTg5ZjAxMGYyNDI4NjIzNjdkIiwidHlwIjoiSldUIn0.eyJjYXBzIjpbeyJhbGxvdyI6WyJwdWIiLCJzdWIiLCJwcnMiLCJoc3QiXSwiY2hhbm5lbHMiOlsiY29ubmVjdG9yOioiXSwibWF0Y2giOiJ3aWxkY2FyZCJ9XSwiY2xpZW50X2lkIjoiY2VudHJpZnVnby1jb25uZWN0b3Itc2EiLCJleHAiOjE3MTQ2NjM0MjcsImlhdCI6MTcxNDY1OTgyNywiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo5ODAyIiwic3ViIjoiY2VudHJpZnVnby1jb25uZWN0b3Itc2EifQ._Uy2HqQfMLg2EWwFo2THBIUgaF__-7a7jldjqUndnznusE5Kg4Hjl5_SUx6GNHq0gTJ_zNzYJheKbl48LHIbdg","expiry":"2024-05-02T08:23:47.2499693-07:00","token_type":"Bearer"}
 7:23AM INF cmd\cli\root\publish\publish.go:54 > OnConnecting event={"Code":0,"Reason":"connect called"}
 7:23AM INF cmd\cli\root\publish\publish.go:57 > OnConnected event={"ClientID":"18a83098-7350-41ad-82e8-43a2b2501110","Data":null,"Version":"5.3.2"}
@@ -48,7 +48,7 @@ The following will publish and subscribe to the channel ```connector:foobar``` u
 .\centrifugo-cli.exe subscribe  
 ```
 
-```bash
+```powershell
 7:25AM INF cmd\cli\root\subscribe\subscribe.go:36 > got token channel=connector:foobar token={"access_token":"eyJhbGciOiJFUzI1NiIsImtpZCI6IjBiMmNkMmU1NGM5MjRjZTg5ZjAxMGYyNDI4NjIzNjdkIiwidHlwIjoiSldUIn0.eyJjYXBzIjpbeyJhbGxvdyI6WyJwdWIiLCJzdWIiLCJwcnMiLCJoc3QiXSwiY2hhbm5lbHMiOlsiY29ubmVjdG9yOioiXSwibWF0Y2giOiJ3aWxkY2FyZCJ9XSwiY2xpZW50X2lkIjoiY2VudHJpZnVnby1jb25uZWN0b3Itc2EiLCJleHAiOjE3MTQ2NjM1MjYsImlhdCI6MTcxNDY1OTkyNiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo5ODAyIiwic3ViIjoiY2VudHJpZnVnby1jb25uZWN0b3Itc2EifQ.eMeTa2MY0b9p6ln_dzIrHJbnrdtesr4Fe44BdGzHMpOOXlq76zl3qUMfVMK7lZ87RPVtJhdz5-eDXmodxyFH8A","expiry":"2024-05-02T08:25:26.1015441-07:00","token_type":"Bearer"}
 7:25AM INF cmd\cli\root\subscribe\subscribe.go:54 > OnConnecting channel=connector:foobar context=client event={"Code":0,"Reason":"connect called"}
 7:25AM INF cmd\cli\root\subscribe\subscribe.go:117 > published message channel=connector:foobar
@@ -71,6 +71,8 @@ The client:```connector-foobar``` is used to excercise connececting directly to 
 
 ### Subscribing to a channel by calling sub.Subscribe()
 
+[JWT REFERENCE for channels](https://centrifugal.dev/docs/server/authentication#channels)  
+
 This is the example [jwt](https://jwt.io/#debugger-io?token=eyJhbGciOiJFUzI1NiIsImtpZCI6IjBiMmNkMmU1NGM5MjRjZTg5ZjAxMGYyNDI4NjIzNjdkIiwidHlwIjoiSldUIn0.eyJjaGFubmVscyI6WyJjb25uZWN0b3I6Zm9vYmFyIl0sImNsaWVudF9pZCI6ImNvbm5lY3Rvci1mb29iYXIiLCJleHAiOjE3MTQ2NjczNTksImlhdCI6MTcxNDY2Mzc1OSwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo5ODAyIiwic3ViIjoiY29ubmVjdG9yLWZvb2JhciJ9.bhSf4sh3K6ntpIAxLNlC_mGVYZ-aSmKm6K966PCu1IQ17r4idivUIPYx_faqqnOO6RTHedRtzffIdtAa8jnBnQ) that is used to subscribe to the channel ```connector:foobar```.  
 
 ```powershell
@@ -79,7 +81,7 @@ This is the example [jwt](https://jwt.io/#debugger-io?token=eyJhbGciOiJFUzI1NiIs
 
 This produces an error and doesn't get any OnPublication events.  
 
-```console  
+```powershell
 8:18AM INF cmd\cli\root\subscribe\subscribe.go:36 > got token channel=connector:foobar token={"access_token":"eyJhbGciOiJFUzI1NiIsImtpZCI6IjBiMmNkMmU1NGM5MjRjZTg5ZjAxMGYyNDI4NjIzNjdkIiwidHlwIjoiSldUIn0.eyJjaGFubmVscyI6WyJjb25uZWN0b3I6Zm9vYmFyIl0sImNsaWVudF9pZCI6ImNvbm5lY3Rvci1mb29iYXIiLCJleHAiOjE3MTQ2NjY3MzcsImlhdCI6MTcxNDY2MzEzNywiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo5ODAyIiwic3ViIjoiY29ubmVjdG9yLWZvb2JhciJ9.TDFYXxEHDnUCbxSyU7XpwnTW-jsir8wjd8B8qdf3MKE0Z3LBaCTBNnVVJgWRp_br5bclea4MMBf-f1dVDrpmng","expiry":"2024-05-02T09:18:57.8345396-07:00","token_type":"Bearer"}
 8:18AM INF cmd\cli\root\subscribe\subscribe.go:54 > OnConnecting channel=connector:foobar context=client event={"Code":0,"Reason":"connect called"}
 8:18AM INF cmd\cli\root\subscribe\subscribe.go:117 > published message channel=connector:foobar
@@ -104,10 +106,21 @@ It still doesn't get the OnPublication events.
 .\centrifugo-cli.exe --oauth2-client-id=connector-foobar subscribe --with-channel-token
 ```
 
-```console
+```powershell
 8:29AM INF cmd\cli\root\subscribe\subscribe.go:36 > got token channel=connector:foobar token={"access_token":"eyJhbGciOiJFUzI1NiIsImtpZCI6IjBiMmNkMmU1NGM5MjRjZTg5ZjAxMGYyNDI4NjIzNjdkIiwidHlwIjoiSldUIn0.eyJjaGFubmVscyI6WyJjb25uZWN0b3I6Zm9vYmFyIl0sImNsaWVudF9pZCI6ImNvbm5lY3Rvci1mb29iYXIiLCJleHAiOjE3MTQ2NjczNDAsImlhdCI6MTcxNDY2Mzc0MCwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo5ODAyIiwic3ViIjoiY29ubmVjdG9yLWZvb2JhciJ9.tGqSCvmqx4_JNjtcKZ1gviJkzPDOjGMOeJ5bQjICwRFTJ68OxVpaUVu9TzziZpFB_zhjpIHpXOH4h7fZI674Og","expiry":"2024-05-02T09:29:00.9399201-07:00","token_type":"Bearer"}
 8:29AM INF cmd\cli\root\subscribe\subscribe.go:54 > OnConnecting channel=connector:foobar context=client event={"Code":0,"Reason":"connect called"}
 8:29AM INF cmd\cli\root\subscribe\subscribe.go:123 > sub.Subscribe channel=connector:foobar context=subscribe
 8:29AM INF cmd\cli\root\subscribe\subscribe.go:57 > OnConnected channel=connector:foobar context=client event={"ClientID":"0405ea0b-3d5c-4f7e-8fd3-60429243b0ff","Data":null,"Version":"5.3.2"}
 8:29AM INF cmd\cli\root\subscribe\subscribe.go:70 > OnSubscribed channel=connector:foobar context=client event={"Channel":"connector:foobar","Data":null,"Positioned":true,"Recoverable":true,"Recovered":false,"StreamPosition":{"Epoch":"VUix","Offset":15},"WasRecovering":false}
+```
+
+### Subscribing to a channel with channel claim as string
+
+[jwt with channel string claim](https://jwt.io/#debugger-io?token=eyJhbGciOiJFUzI1NiIsImtpZCI6IjBiMmNkMmU1NGM5MjRjZTg5ZjAxMGYyNDI4NjIzNjdkIiwidHlwIjoiSldUIn0.eyJjaGFubmVsIjoiY29ubmVjdG9yOmZvb2JhciIsImNsaWVudF9pZCI6ImNvbm5lY3Rvci1mb29iYXItb25lIiwiZXhwIjoxNzE0NjY4NTc4LCJpYXQiOjE3MTQ2NjQ5NzgsImlzcyI6Imh0dHA6Ly9sb2NhbGhvc3Q6OTgwMiIsInN1YiI6ImNvbm5lY3Rvci1mb29iYXItb25lIn0.ieEr6wVPSXWSZJFsexGAGWSxJeipam_dUBkXFqXRDG0K4820nlMEVjQwhoXiJ53ZI1iKlJJxWou9_DMmcvnvxg) produces the following errors.  This one is expected to fail because the token doesn't contains a channels claim of ```[]string{}```.  
+
+```powershell
+8:49AM INF cmd\cli\root\subscribe\subscribe.go:36 > got token channel=connector:foobar token={"access_token":"eyJhbGciOiJFUzI1NiIsImtpZCI6IjBiMmNkMmU1NGM5MjRjZTg5ZjAxMGYyNDI4NjIzNjdkIiwidHlwIjoiSldUIn0.eyJjaGFubmVsIjoiY29ubmVjdG9yOmZvb2JhciIsImNsaWVudF9pZCI6ImNvbm5lY3Rvci1mb29iYXItb25lIiwiZXhwIjoxNzE0NjY4NTc4LCJpYXQiOjE3MTQ2NjQ5NzgsImlzcyI6Imh0dHA6Ly9sb2NhbGhvc3Q6OTgwMiIsInN1YiI6ImNvbm5lY3Rvci1mb29iYXItb25lIn0.ieEr6wVPSXWSZJFsexGAGWSxJeipam_dUBkXFqXRDG0K4820nlMEVjQwhoXiJ53ZI1iKlJJxWou9_DMmcvnvxg","expiry":"2024-05-02T09:49:38.1874826-07:00","token_type":"Bearer"}
+8:49AM INF cmd\cli\root\subscribe\subscribe.go:54 > OnConnecting channel=connector:foobar context=client event={"Code":0,"Reason":"connect called"}
+8:49AM INF cmd\cli\root\subscribe\subscribe.go:123 > sub.Subscribe channel=connector:foobar context=subscribe
+8:49AM INF cmd\cli\root\subscribe\subscribe.go:60 > OnDisconnected channel=connector:foobar context=client event={"Code":3500,"Reason":"invalid token"}
 ```
