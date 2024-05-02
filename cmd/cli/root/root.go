@@ -67,11 +67,23 @@ func InitRootCmd() *cobra.Command {
 	viper.BindPFlag(flagName, rootCmd.PersistentFlags().Lookup(flagName))
 
 	flagName = "port"
-	rootCmd.PersistentFlags().IntVar(&internal.Port, flagName, 8000, fmt.Sprintf("[required] i.e. --%s=8000", flagName))
+	rootCmd.PersistentFlags().IntVar(&internal.Port, flagName, 8775, fmt.Sprintf("[required] i.e. --%s=8775", flagName))
 	viper.BindPFlag(flagName, rootCmd.PersistentFlags().Lookup(flagName))
 
 	flagName = "channel"
-	rootCmd.PersistentFlags().StringVar(&internal.Channel, flagName, "chat:index", fmt.Sprintf("[required] i.e. --%s=chat:index", flagName))
+	rootCmd.PersistentFlags().StringVar(&internal.Channel, flagName, "connector:foobar", fmt.Sprintf("[required] i.e. --%s=connector:foobar", flagName))
+	viper.BindPFlag(flagName, rootCmd.PersistentFlags().Lookup(flagName))
+
+	flagName = "oauth2-client-id"
+	rootCmd.PersistentFlags().StringVar(&internal.OAuth2.ClientID, flagName, "centrifugo-connector-sa", fmt.Sprintf("[required] i.e. --%s=centrifugo-connector-sa", flagName))
+	viper.BindPFlag(flagName, rootCmd.PersistentFlags().Lookup(flagName))
+
+	flagName = "oauth2-client-secret"
+	rootCmd.PersistentFlags().StringVar(&internal.OAuth2.ClientSecret, flagName, "secret", fmt.Sprintf("[required] i.e. --%s=secret", flagName))
+	viper.BindPFlag(flagName, rootCmd.PersistentFlags().Lookup(flagName))
+
+	flagName = "oauth2-token-endpoint"
+	rootCmd.PersistentFlags().StringVar(&internal.OAuth2.TokenEndepoint, flagName, "http://localhost:9802/oauth/token", fmt.Sprintf("[required] i.e. --%s=http://localhost:9802/oauth/token", flagName))
 	viper.BindPFlag(flagName, rootCmd.PersistentFlags().Lookup(flagName))
 
 	version.Init(rootCmd)

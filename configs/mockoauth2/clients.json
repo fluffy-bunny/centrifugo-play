@@ -1,0 +1,38 @@
+[
+  {
+    "claims": {
+      "caps": [
+        {
+          "channels": ["connector:*"],
+          "match": "wildcard",
+          "allow": ["pub", "sub", "prs", "hst"]
+        }
+      ],
+      "sub": "centrifugo-connector-sa"
+    },
+    "client_id": "centrifugo-connector-sa",
+    "client_secret": "secret",
+    "expiration": 3600,
+    "issuer": ""
+  },
+  {
+    "claims": {
+      "channels": ["connector:foobar"],
+      "sub": "connector-foobar"
+    },
+    "client_id": "connector-foobar",
+    "client_secret": "secret",
+    "expiration": 3600,
+    "issuer": ""
+  },
+  {
+    "claims": {
+      "channels": ["connector:foobar", "connector:foobar-too"],
+      "sub": "connector-foobar-many"
+    },
+    "client_id": "connector-foobar-many",
+    "client_secret": "secret",
+    "expiration": 3600,
+    "issuer": ""
+  }
+]

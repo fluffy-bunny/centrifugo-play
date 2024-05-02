@@ -1,17 +1,18 @@
 package publish
 
 import (
+	"centrifugo-play/cmd/cli/internal"
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
-
-	"centrifugo-play/cmd/cli/internal"
+	"os"
 
 	"github.com/centrifugal/centrifuge-go"
-	"github.com/golang-jwt/jwt"
+	zerolog "github.com/rs/zerolog"
+	log "github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	cc "golang.org/x/oauth2/clientcredentials"
 )
 
 // Version global
@@ -26,12 +27,32 @@ func Init(rootCmd *cobra.Command) {
 		Use:   "publish",
 		Short: "publish to a channel",
 		Run: func(cmd *cobra.Command, args []string) {
+			ctx := context.Background()
+			log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr}).With().Caller().Timestamp().Logger()
+
+			config := &cc.Config{
+				ClientID:     internal.OAuth2.ClientID,
+				ClientSecret: internal.OAuth2.ClientSecret,
+				TokenURL:     internal.OAuth2.TokenEndepoint,
+				Scopes:       []string{},
+			}
+			tokenSource := config.TokenSource(ctx)
+			token, err := tokenSource.Token()
+			if err != nil {
+				log.Fatal().Err(err).Msg("failed to get token")
+			}
+			log.Info().Interface("token", token).Msg("got token")
 			endpoint := fmt.Sprintf("ws://localhost:%d/connection/websocket", internal.Port)
 			client := centrifuge.NewJsonClient(
 				endpoint,
 				centrifuge.Config{
-					// Sending token makes it work with Centrifugo JWT auth (with `secret` HMAC key).
-					Token: connToken("49", 0),
+					GetToken: func(centrifuge.ConnectionTokenEvent) (string, error) {
+						token, err := tokenSource.Token()
+						if err != nil {
+							return "", err
+						}
+						return token.AccessToken, nil
+					},
 				},
 			)
 			defer client.Close()
@@ -73,9 +94,9 @@ func Init(rootCmd *cobra.Command) {
 				log.Printf("Leave from server-side channel %s: %s (%s)", e.Channel, e.User, e.Client)
 			})
 
-			err := client.Connect()
+			err = client.Connect()
 			if err != nil {
-				log.Fatalln(err)
+				log.Fatal().Err(err).Msg("failed to connect")
 			}
 			msg := &internal.ChatMessage{
 				Input: Message,
@@ -84,29 +105,15 @@ func Init(rootCmd *cobra.Command) {
 
 			_, err = client.Publish(context.Background(), internal.Channel, data)
 			if err != nil {
-				log.Fatalln(err)
+				log.Fatal().Err(err).Msg("failed to publish message")
 			}
-			log.Println("published message")
+			log.Info().Msg("published message")
 		},
 	}
 	var flagName = "message"
-	command.PersistentFlags().StringVar(&Message, flagName, "hello", fmt.Sprintf("[required] i.e. --%s=hello", flagName))
+	message := `{"a":"b"}`
+	command.PersistentFlags().StringVar(&Message, flagName, message, fmt.Sprintf("[required] i.e. --%s='%s'", flagName, message))
 	viper.BindPFlag(flagName, rootCmd.PersistentFlags().Lookup(flagName))
 
 	rootCmd.AddCommand(command)
-}
-func connToken(user string, exp int64) string {
-	// NOTE that JWT must be generated on backend side of your application!
-	// Here we are generating it on client side only for example simplicity.
-	claims := jwt.MapClaims{"sub": user}
-	if exp > 0 {
-		claims["exp"] = exp
-	}
-	t, err := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).
-		SignedString([]byte(internal.ExampleTokenHmacSecret))
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println("token: ", t)
-	return t
 }

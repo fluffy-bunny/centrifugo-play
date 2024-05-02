@@ -1,0 +1,30 @@
+version: "3.9"
+services:
+  mock-oauth2-pro:
+    container_name: mock-oauth2-pro
+    image: ghstahl/fluffycore.starterkit:latest
+    ports:
+      - "9802:50053"
+    environment:
+      APPLICATION_NAME: "mydevoauthserver"
+      APPLICATION_ENVIRONMENT: "DOCKER"
+      LOG_LEVEL": "debug"
+      PRETTY_LOG: "true"
+      OAUTH2_PORT: "50053"
+      CONFIG_FILES__CLIENT_PATH: "/config/clients.json"
+    volumes:
+      - ./configs/mockoauth2/clients.json:/config/clients.json
+    entrypoint: ["/app/server", "serve"]
+
+  centrifugo-pro:
+    container_name: centrifugo-pro
+    image: centrifugo/centrifugo-pro:v5
+    volumes:
+      - ./configs/centrifugo/config-pro.json:/centrifugo/config.json
+    command: centrifugo -c config.json
+    ports:
+      - 8775:8000
+    ulimits:
+      nofile:
+        soft: 65535
+        hard: 65535
