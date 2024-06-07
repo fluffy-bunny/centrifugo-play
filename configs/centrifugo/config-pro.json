@@ -1,10 +1,21 @@
 {
+  "grpc_api": true,
+  "grpc_api_address": "localhost",
+  "grpc_api_port": 50051,
+  "grpc_api_reflection": true,
+  "grpc_api_tls_disable": true,
   "token_jwks_public_endpoint": "http://mock-oauth2-pro:50053/.well-known/jwks",
   "admin_password": "password",
   "admin_secret": "secret",
   "admin": true,
-  "allowed_origins": ["http://localhost:3000"],
-  "allow_subscribe_for_client": true,
+  "api_key": "secret",
+  "allowed_origins": [
+    "http://localhost:3000"
+  ],
+  "engine": "redis",
+  "redis_address": [
+    "redis:6379"
+  ],
   "namespaces": [
     {
       "name": "connector",
@@ -13,7 +24,15 @@
       "history_size": 200,
       "history_ttl": "300h",
       "force_positioning": true,
-      "force_recovery": true
+      "force_recovery": true,
+      "allow_subscribe_for_client": true,
+      "allow_subscribe_for_anonymous": true,
+      "allow_publish_for_subscriber": true,
+      "allow_publish_for_anonymous": true,
+      "allow_history_for_subscriber": true,
+      "allow_history_for_anonymous": true,
+      "allow_presence_for_subscriber": true,
+      "allow_presence_for_anonymous": true
     },
     {
       "name": "connector_private",

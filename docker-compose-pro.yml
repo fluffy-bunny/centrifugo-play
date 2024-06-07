@@ -1,20 +1,54 @@
-version: "3.9"
 services:
   mock-oauth2-pro:
     container_name: mock-oauth2-pro
     image: ghstahl/fluffycore.starterkit:latest
     ports:
       - "9802:50053"
+      - "9803:50051"
+
     environment:
       APPLICATION_NAME: "mydevoauthserver"
       APPLICATION_ENVIRONMENT: "DOCKER"
       LOG_LEVEL": "debug"
       PRETTY_LOG: "true"
-      OAUTH2_PORT: "50053"
-      CONFIG_FILES__CLIENT_PATH: "/config/clients.json"
+      oauth2Port: "50053"
+      configFiles__clientPath: "/config/clients.json"
     volumes:
       - ./configs/mockoauth2/clients.json:/config/clients.json
     entrypoint: ["/app/server", "serve"]
+  redis:
+    image: redis:${REDIS_VERSION:-7}-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+  sentinel:
+    image: redis:${REDIS_VERSION:-7}-alpine
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        redis-server --save "" --appendonly no --port 6380 &
+        echo "sentinel monitor mymaster 127.0.0.1 6380 2\n" > sentinel.conf
+        redis-server sentinel.conf --sentinel
+    ports:
+      - "6380:6380"
+      - "26379:26379"
+  cluster:
+    image: redis:${REDIS_VERSION:-7}-alpine
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        redis-server --port 7000 --save "" --appendonly no --cluster-enabled yes --cluster-config-file 7000.conf &
+        redis-server --port 7001 --save "" --appendonly no --cluster-enabled yes --cluster-config-file 7001.conf &
+        redis-server --port 7002 --save "" --appendonly no --cluster-enabled yes --cluster-config-file 7002.conf &
+        while ! redis-cli --cluster create 127.0.0.1:7000 127.0.0.1:7001 127.0.0.1:7002 --cluster-yes; do sleep 1; done
+        wait
+    ports:
+      - "7000:7000"
+      - "7001:7001"
+      - "7002:7002"
 
   centrifugo-pro:
     container_name: centrifugo-pro
@@ -23,8 +57,12 @@ services:
       - ./configs/centrifugo/config-pro.json:/centrifugo/config.json
     command: centrifugo -c config.json
     ports:
-      - 8775:8000
+      - 8765:8000
+      - 50051:50051
     ulimits:
       nofile:
         soft: 65535
         hard: 65535
+    depends_on:
+      redis:
+        condition: service_healthy
